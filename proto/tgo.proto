@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "./v1";
+
+package pto;
+
+service Tgo {
+  rpc Tg(Request) returns (Response){}
+}
+
+message Request {
+  string uid = 1;
+  string name = 2;
+}
+
+message Response {
+  bool status = 1;
+  string message = 2;
+}
