@@ -182,6 +182,7 @@ func TestLc_LCByID(t *testing.T) {
 	t.Run("http status ok", func(t *testing.T) {
 		var f = fiber.New()
 		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 
 		mlc := mocks.NewMockLC(ctrl)
 		mlc.EXPECT().LCXByID(gomock.Any()).Return(&store.Lcg{
@@ -221,6 +222,7 @@ func TestLc_LCByID(t *testing.T) {
 		var f = fiber.New()
 
 		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 
 		mlc := mocks.NewMockLC(ctrl)
 
@@ -243,6 +245,7 @@ func TestLc_LCByID(t *testing.T) {
 		var f = fiber.New()
 
 		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 
 		mlc := mocks.NewMockLC(ctrl)
 		mlc.EXPECT().LCXByID(gomock.Any()).Return(nil, mongo.ErrNoDocuments)
