@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"tgo/store"
-	mock_store "tgo/store/mocks"
+	"tgo/store/mocks"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang/mock/gomock"
@@ -111,7 +111,7 @@ func TestLc_LC(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 
-		mlc := mock_store.NewMockLC(ctrl)
+		mlc := mocks.NewMockLC(ctrl)
 		mlc.EXPECT().LCX().Return([]*store.Lcg{
 			{
 				ID:        primitive.NewObjectID(),
@@ -158,7 +158,7 @@ func TestLc_LC(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 
-		mlc := mock_store.NewMockLC(ctrl)
+		mlc := mocks.NewMockLC(ctrl)
 		mlc.EXPECT().LCX().Return([]*store.Lcg{}, mongo.ErrNoDocuments)
 
 		NewLC(f, mlc)
@@ -183,7 +183,7 @@ func TestLc_LCByID(t *testing.T) {
 		var f = fiber.New()
 		ctrl := gomock.NewController(t)
 
-		mlc := mock_store.NewMockLC(ctrl)
+		mlc := mocks.NewMockLC(ctrl)
 		mlc.EXPECT().LCXByID(gomock.Any()).Return(&store.Lcg{
 			ID:        id,
 			Name:      "001",
@@ -222,7 +222,7 @@ func TestLc_LCByID(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 
-		mlc := mock_store.NewMockLC(ctrl)
+		mlc := mocks.NewMockLC(ctrl)
 
 		NewLC(f, mlc)
 		res, err := f.Test(httptest.NewRequest(http.MethodGet, "/lc/id", nil))
@@ -244,7 +244,7 @@ func TestLc_LCByID(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 
-		mlc := mock_store.NewMockLC(ctrl)
+		mlc := mocks.NewMockLC(ctrl)
 		mlc.EXPECT().LCXByID(gomock.Any()).Return(nil, mongo.ErrNoDocuments)
 
 		NewLC(f, mlc)

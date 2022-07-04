@@ -13,6 +13,6 @@ generate:
 
 mock:
 	mkdir -p ./pto/mocks
-	mockgen -source=./pto/v1/tgo_grpc.pb.go TgoClient > pto/mocks/tgo_mock.go
+	mockgen -package mocks -source=./pto/v1/tgo_grpc.pb.go TgoClient > pto/mocks/tgo_mock.go
 	mkdir -p ./store/mocks
-	mockgen -source=./store/lc.go LC > store/mocks/lc.go
+	mockgen -package mocks -source=./store/lc.go LC > store/mocks/lc.go

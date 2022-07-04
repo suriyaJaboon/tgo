@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 	"testing"
 	"tgo/pto"
-	mock_v1 "tgo/pto/mocks"
+	"tgo/pto/mocks"
 	"tgo/pto/v1"
 )
 
@@ -16,7 +16,7 @@ func TestGRPC_Client(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mtc := mock_v1.NewMockTgoClient(ctrl)
+	mtc := mocks.NewMockTgoClient(ctrl)
 
 	t.Run("Tgo success", func(t *testing.T) {
 		mtc.EXPECT().Tg(
@@ -58,27 +58,11 @@ func TestTestGRPC_Server(t *testing.T) {
 }
 
 func FuzzNewGRPC(f *testing.F) {
-	tests := []struct {
-		name string
-		want interface{}
-	}{
-		// TODO: Add test cases.
-		{
-			name: "case-01",
-			want: NewGRPC(),
-		},
-		{
-			name: "case-02",
-			want: NewGRPC(),
-		},
-	}
-	for _, tt := range tests {
-		f.Add(tt)
-	}
-
-	f.Fuzz(func(t *testing.T, orig string) {
-		if ng := NewGRPC(); ng != nil {
-			t.Errorf("New gRPC not nil: %v %s", ng, orig)
+	f.Add("localhost:5000")
+	f.Fuzz(func(t *testing.T, host string) {
+		rpc, err := NewGRPC(host)
+		if !rpc && err != nil {
+			t.Errorf("New gRPC type bool: %v", rpc)
 		}
 	})
 }

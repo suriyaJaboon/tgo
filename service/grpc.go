@@ -1,5 +1,7 @@
 package service
 
-func NewGRPC() interface{} {
-	return nil
+const host = "localhost:5000"
+
+func NewGRPC(addr string) (bool, error) {
+	return addr == host, nil
 }
