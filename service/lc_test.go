@@ -10,10 +10,14 @@ import (
 	"time"
 
 	"tgo/store"
+	mock_store "tgo/store/mocks"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
 
@@ -98,5 +102,163 @@ func Test_lc_LC(t *testing.T) {
 		mt.AddMockResponses(first, killCursors)
 
 		requestTesting(t, mt, http.StatusInternalServerError)
+	})
+}
+
+func TestLc_LC(t *testing.T) {
+	t.Run("http status ok", func(t *testing.T) {
+		var f = fiber.New()
+
+		ctrl := gomock.NewController(t)
+
+		mlc := mock_store.NewMockLC(ctrl)
+		mlc.EXPECT().LCX().Return([]*store.Lcg{
+			{
+				ID:        primitive.NewObjectID(),
+				Name:      "001",
+				Age:       1,
+				CreatedAt: time.Now(),
+			},
+			{
+				ID:        primitive.NewObjectID(),
+				Name:      "002",
+				Age:       2,
+				CreatedAt: time.Now(),
+			},
+		}, nil)
+
+		NewLC(f, mlc)
+		res, err := f.Test(httptest.NewRequest(http.MethodGet, "/lc", nil))
+		if err != nil {
+			t.Errorf("http request service lc shoud be error %v", err)
+		}
+
+		defer func() {
+			if err = res.Body.Close(); err != nil {
+				t.Skip("http request skip close body", err)
+			}
+		}()
+
+		bt, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Errorf("http respose read all body error: %v", err)
+		}
+
+		var ls []store.Lcg
+		if err = json.Unmarshal(bt, &ls); err != nil {
+			assert.Errorf(t, err, "http respose read all body error: %v", err)
+		}
+
+		assert.Equal(t, http.StatusOK, res.StatusCode)
+		assert.Equal(t, 2, len(ls))
+	})
+
+	t.Run("http internal server error", func(t *testing.T) {
+		var f = fiber.New()
+
+		ctrl := gomock.NewController(t)
+
+		mlc := mock_store.NewMockLC(ctrl)
+		mlc.EXPECT().LCX().Return([]*store.Lcg{}, mongo.ErrNoDocuments)
+
+		NewLC(f, mlc)
+		res, err := f.Test(httptest.NewRequest(http.MethodGet, "/lc", nil))
+		if err != nil {
+			t.Errorf("http request service lc shoud be error %v", err)
+		}
+
+		defer func() {
+			if err = res.Body.Close(); err != nil {
+				t.Skip("http request skip close body", err)
+			}
+		}()
+		assert.Equal(t, http.StatusInternalServerError, res.StatusCode)
+	})
+}
+
+func TestLc_LCByID(t *testing.T) {
+	var id = primitive.NewObjectID()
+
+	t.Run("http status ok", func(t *testing.T) {
+		var f = fiber.New()
+		ctrl := gomock.NewController(t)
+
+		mlc := mock_store.NewMockLC(ctrl)
+		mlc.EXPECT().LCXByID(gomock.Any()).Return(&store.Lcg{
+			ID:        id,
+			Name:      "001",
+			Age:       1,
+			CreatedAt: time.Now(),
+		}, nil)
+
+		NewLC(f, mlc)
+		res, err := f.Test(httptest.NewRequest(http.MethodGet, "/lc/"+id.Hex(), nil))
+		if err != nil {
+			t.Errorf("http request service lc shoud be error %v", err)
+		}
+
+		defer func() {
+			if err = res.Body.Close(); err != nil {
+				t.Skip("http request skip close body", err)
+			}
+		}()
+
+		bt, err := io.ReadAll(res.Body)
+		if err != nil {
+			t.Errorf("http respose read all body error: %v", err)
+		}
+
+		var ls store.Lcg
+		if err = json.Unmarshal(bt, &ls); err != nil {
+			assert.Errorf(t, err, "http respose read all body error: %v", err)
+		}
+
+		assert.Equal(t, http.StatusOK, res.StatusCode)
+		assert.Equal(t, id.Hex(), ls.ID.Hex())
+	})
+
+	t.Run("http invalid not accept table", func(t *testing.T) {
+		var f = fiber.New()
+
+		ctrl := gomock.NewController(t)
+
+		mlc := mock_store.NewMockLC(ctrl)
+
+		NewLC(f, mlc)
+		res, err := f.Test(httptest.NewRequest(http.MethodGet, "/lc/id", nil))
+		if err != nil {
+			t.Errorf("http request service lc shoud be error %v", err)
+		}
+
+		defer func() {
+			if err = res.Body.Close(); err != nil {
+				t.Skip("http request skip close body", err)
+			}
+		}()
+
+		assert.Equal(t, http.StatusNotAcceptable, res.StatusCode)
+	})
+
+	t.Run("http internal server error", func(t *testing.T) {
+		var f = fiber.New()
+
+		ctrl := gomock.NewController(t)
+
+		mlc := mock_store.NewMockLC(ctrl)
+		mlc.EXPECT().LCXByID(gomock.Any()).Return(nil, mongo.ErrNoDocuments)
+
+		NewLC(f, mlc)
+		res, err := f.Test(httptest.NewRequest(http.MethodGet, "/lc/"+id.Hex(), nil))
+		if err != nil {
+			t.Errorf("http request service lc shoud be error %v", err)
+		}
+
+		defer func() {
+			if err = res.Body.Close(); err != nil {
+				t.Skip("http request skip close body", err)
+			}
+		}()
+
+		assert.Equal(t, http.StatusInternalServerError, res.StatusCode)
 	})
 }

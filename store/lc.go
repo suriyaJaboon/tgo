@@ -1,5 +1,7 @@
 package store
 
+//go:generate mockgen -source ./lc.go LC -destination ./mocks/lc_mock.go
+
 import (
 	"context"
 	"time"
@@ -12,6 +14,7 @@ import (
 
 type LC interface {
 	LCX() ([]*Lcg, error)
+	LCXByID(id primitive.ObjectID) (*Lcg, error)
 	CreateLCX(dto *LcgDto) (*Lcg, error)
 }
 
@@ -54,6 +57,16 @@ func (l lc) LCX() ([]*Lcg, error) {
 	}
 
 	return lgs, nil
+}
+
+func (l lc) LCXByID(id primitive.ObjectID) (*Lcg, error) {
+	var lcg Lcg
+	err := l.c.FindOne(l.ctx, bson.M{"_id": id}).Decode(&lcg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &lcg, nil
 }
 
 func (l lc) CreateLCX(dto *LcgDto) (*Lcg, error) {

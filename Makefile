@@ -12,5 +12,7 @@ generate:
 	#protoc --proto_path=proto proto/*.proto  --go_out=:pto --go-grpc_out=:pto --grpc-gateway_out=:pto --openapiv2_out=:swagger --validate_out="lang=go:pto"
 
 mock:
-	mkdir -p ./mk
-	mockgen -source=./pto/v1/tgo_grpc.pb.go TgoClient > mkx/tgo_mock.go
+	mkdir -p ./pto/mocks
+	mockgen -source=./pto/v1/tgo_grpc.pb.go TgoClient > pto/mocks/tgo_mock.go
+	mkdir -p ./store/mocks
+	mockgen -source=./store/lc.go LC > store/mocks/lc.go

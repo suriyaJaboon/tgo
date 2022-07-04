@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"testing"
-	"tgo/mk"
 	"tgo/pto"
+	mock_v1 "tgo/pto/mocks"
 	"tgo/pto/v1"
 )
 
@@ -16,7 +16,7 @@ func TestGRPC_Client(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mtc := mk.NewMockTgoClient(ctrl)
+	mtc := mock_v1.NewMockTgoClient(ctrl)
 
 	t.Run("Tgo success", func(t *testing.T) {
 		mtc.EXPECT().Tg(
@@ -65,11 +65,11 @@ func FuzzNewGRPC(f *testing.F) {
 		// TODO: Add test cases.
 		{
 			name: "case-01",
-			want: nil,
+			want: NewGRPC(),
 		},
 		{
 			name: "case-02",
-			want: nil,
+			want: NewGRPC(),
 		},
 	}
 	for _, tt := range tests {
